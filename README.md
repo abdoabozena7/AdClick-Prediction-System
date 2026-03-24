@@ -1,70 +1,165 @@
-# CTR Prediction with Data Fusion and Ensemble Learning
+# Project Fusion ECU
 
-This repository demonstrates a complete machine‑learning pipeline for click‑through rate (CTR) prediction using multiple data sources.  The goal is to build a robust model that can estimate the probability that a user clicks on an advertisement based on their demographic profile, historic browsing behaviour and ad attributes.
+AI-powered CTR prediction and ad spend decision support built with data fusion, ensemble learning, and a Streamlit interface.
 
-The project follows a structured workflow:
+## Overview
 
-1. **Data ingestion** – Raw CSV files from [Alibaba Taobao Advertising Dataset](https://tianchi.aliyun.com/dataset/dataDetail?dataId=408) are placed into the `data/raw` directory.  They include user demographics (`user_profile.csv`), ad metadata (`ad_feature.csv`), click logs (`raw_sample.csv`) and behavioural logs (`behavior_log.csv`).  *You must download these files yourself from Kaggle or TianChi and copy them into `data/raw`.*
+This project combines multiple advertising data sources to estimate click-through probability and support budget allocation decisions. It covers the full workflow from data preparation and feature engineering to model training, evaluation, and deployment.
 
-2. **Data cleaning** – Missing values are imputed, duplicate rows dropped and suspicious outliers removed.  Timestamp columns are converted into datetime objects.  Each step is documented in the notebook `02_data_cleaning.ipynb`.
+The deployed interface is a Streamlit app that lets you:
 
-3. **Exploratory data analysis (EDA) and fusion** – We explore distributions of individual variables, examine relationships between variables and build preliminary insights.  Multiple data sources are fused using three strategies:
+- upload a CSV of ad opportunities
+- score each row with trained CTR models
+- rank opportunities by predicted click probability
+- choose a Top-K spending budget
+- export selected and skipped records
 
-   * **Early Fusion:** merge user, ad and click logs on common keys (e.g. `user id` and `adgroup id`), producing a single, enriched table.
-   * **Late Fusion:** train separate models on each data source and combine their predictions via stacking or voting.
-   * **Hybrid Fusion:** derive statistical features from separate sources (e.g. average click rate per ad, browsing frequency per user) and append them to the main table before training.
+## Highlights
 
-   All visualisations and intermediate data sets are stored in `03_eda_fusion.ipynb`.  We generate histograms, box plots, correlation heatmaps and feature importance charts.
+- Multi-source data fusion across user, ad, and behavior data
+- Classical ML and ensemble models for tabular CTR prediction
+- Notebook-based workflow for cleaning, EDA, preprocessing, training, and evaluation
+- Streamlit decision console for interactive scoring and ranking
+- Saved models and preprocessing artifacts included in the repository
 
-4. **Preprocessing and feature engineering** – Categorical variables are encoded using one‑hot encoding or frequency encoding.  Numeric variables are scaled.  We engineer additional features such as polynomial combinations and statistical aggregates.  The preprocessed data is split into training and test sets with stratification on the target label.
+## App Preview
 
-5. **Model development** – Several baseline classifiers (Logistic Regression, Random Forest, Gradient Boosting, XGBoost and CatBoost) are trained.  We then build ensemble models including bagging, boosting, voting and stacking classifiers.  Hyper‑parameters are tuned via cross‑validation.  The best models are saved to `models/` for later use.
+The app in `app/streamlit_app.py` is designed as an "Ad Spend Decision Tool" with four main views:
 
-6. **Evaluation** – The models are compared using metrics appropriate for classification: Area Under the ROC Curve (AUC), F1‑score, accuracy, precision, recall and confusion matrices.  We also perform error analysis to understand where the models succeed or fail.  Results are summarised in `06_model_evaluation.ipynb`.
+- `Console`: upload data, score opportunities, and export spend decisions
+- `Rank Lab`: inspect sorted predictions and score distribution
+- `Explain One`: review one row with simple business-facing reasoning
+- `How it Works`: quick operator guide for the decision flow
 
-7. **Deployment** – A Streamlit application is provided in `07_deployment_streamlit.ipynb` to demonstrate how to load the trained model, accept user input and display a predicted click probability.  This notebook can be exported to a standalone script for deployment.
+## Screenshots
 
-## Project structure
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="Screenshots/1.png" alt="Main decision dashboard" width="100%">
+      <br>
+      <sub>Main decision dashboard</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="Screenshots/2.png" alt="Scored output and selection results" width="100%">
+      <br>
+      <sub>Scored output and spend selection</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="Screenshots/3.png" alt="Ranking workspace" width="100%">
+      <br>
+      <sub>Ranking and score inspection</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="Screenshots/4.png" alt="Single-row explanation view" width="100%">
+      <br>
+      <sub>Single-row explanation view</sub>
+    </td>
+  </tr>
+</table>
 
+## Repository Structure
+
+```text
+project_fusion_ecu/
+|-- app/
+|   `-- streamlit_app.py
+|-- data/
+|   |-- raw/
+|   |   `-- v4_dataset/
+|   `-- processed/
+|-- models/
+|-- notebooks/
+|   |-- 01_data_overview.ipynb
+|   |-- 02_data_cleaning.ipynb
+|   |-- 03_eda_fusion.ipynb
+|   |-- 04_preprocessing.ipynb
+|   |-- 05_model_training.ipynb
+|   |-- 06_model_evaluation.ipynb
+|   `-- 07_deployment_streamlit.ipynb
+|-- Screenshots/
+|-- requirements.txt
+`-- README.md
 ```
-project_fusion_ensemble/
-├── data/
-│   ├── raw/           # Place downloaded CSV files here (user_profile.csv, ad_feature.csv, raw_sample.csv, behavior_log.csv)
-│   └── processed/     # Intermediate and cleaned data sets (generated programmatically)
-├── notebooks/
-│   ├── 01_data_overview.ipynb        # Initial exploration and summary of each data source
-│   ├── 02_data_cleaning.ipynb        # Handling missing data, duplicates and outliers
-│   ├── 03_eda_fusion.ipynb           # Exploratory data analysis and data fusion strategies
-│   ├── 04_preprocessing.ipynb        # Encoding, scaling, feature engineering and handling imbalance
-│   ├── 05_model_training.ipynb       # Training baseline and ensemble models
-│   ├── 06_model_evaluation.ipynb     # Evaluating and comparing model performance
-│   └── 07_deployment_streamlit.ipynb # Streamlit app for inference
-├── models/           # Persisted trained models (saved during execution of notebooks)
-├── requirements.txt  # Python package requirements
-└── README.md         # This document
+
+## Workflow
+
+1. Inspect and understand the raw advertising datasets.
+2. Clean and standardize source tables.
+3. Fuse user, ad, and behavior information into a training dataset.
+4. Engineer features and prepare model-ready inputs.
+5. Train baseline and ensemble classifiers.
+6. Compare models using ROC-AUC, PR-AUC, log loss, F1, and Precision@K.
+7. Deploy the scoring experience through Streamlit.
+
+## Models and Evaluation
+
+The repository already includes trained models under `models/` and evaluation outputs under `data/processed/`.
+
+### Best recorded results
+
+| Model | ROC-AUC | PR-AUC | Log Loss | F1 |
+| --- | ---: | ---: | ---: | ---: |
+| Stacking_Calibrated | 0.5338 | 0.0983 | 0.8303 | 0.1612 |
+| Bagging_LR | 0.5337 | 0.0976 | 0.5749 | 0.1554 |
+| LogisticRegression | 0.5328 | 0.0975 | 0.6185 | 0.1561 |
+| ExtraTrees | 0.5256 | 0.0955 | 0.2940 | 0.1551 |
+
+Additional ranking performance from `precision_at_k.csv`:
+
+- Best `Precision@500`: `Bagging_LR` at `0.140`
+- Best `Precision@1000`: `ExtraTrees` at `0.127`
+- Best `Precision@2000`: `RandomForest` at `0.1195`
+- Best `Precision@5000`: `Stacking_Calibrated` at `0.102`
+
+The current processed feature space uses `37` features according to `data/processed/feature_count.json`.
+
+## Tech Stack
+
+- Python
+- Pandas and NumPy
+- Scikit-learn
+- XGBoost, LightGBM, and CatBoost
+- Matplotlib, Seaborn, and Plotly
+- Streamlit
+- Jupyter notebooks
+
+## Quick Start
+
+### 1. Install dependencies
+
+```bash
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
 ```
 
-## Getting started
+### 2. Run the Streamlit app
 
-1. **Install dependencies:** create a virtual environment and install the packages listed in `requirements.txt`.
+```bash
+streamlit run app/streamlit_app.py
+```
 
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate
-   pip install -r requirements.txt
-   ```
+### 3. Reproduce the notebook workflow
 
-2. **Download data:** obtain the four CSV files from Kaggle or TianChi.  Copy them into `project_fusion_ensemble/data/raw/` with the same names used in the notebooks.  Make sure not to commit the raw data to version control.
+Run the notebooks in order:
 
-3. **Run the notebooks:** open each notebook in order.  Execute all cells to reproduce the results.  The notebooks are heavily commented to explain each step, from data inspection through feature engineering and model building, to evaluation and deployment.
-
-4. **Deploy the model:** after training and evaluation, the best model is saved in `models/`.  The Streamlit notebook demonstrates how to load this model and create a simple web interface for inference.  You can export the notebook to a Python script using Jupyter’s `File → Download as → Python` or convert using `nbconvert`.
+1. `01_data_overview.ipynb`
+2. `02_data_cleaning.ipynb`
+3. `03_eda_fusion.ipynb`
+4. `04_preprocessing.ipynb`
+5. `05_model_training.ipynb`
+6. `06_model_evaluation.ipynb`
+7. `07_deployment_streamlit.ipynb`
 
 ## Notes
 
-* This project avoids deep learning and image models.  The focus is on classical machine‑learning algorithms and statistical techniques suitable for tabular data.
-* The notebooks are designed to be modular.  You can add or skip sections depending on your coursework requirements.
-* Visualisation is performed with Matplotlib, Seaborn and Plotly.  Feature importances are extracted from tree‑based models and displayed as bar charts.
-* The code is written in a notebook format for ease of explanation.  For production use, consider refactoring into reusable Python modules and scripts.
+- The app expects trained models inside `models/`.
+- The scoring flow uses `data/processed/preprocessor.joblib` when available.
+- Processed artifacts and evaluation files already exist in this repository, so the app can be run directly if the environment is prepared.
 
-Feel free to explore, modify and extend this project.  Good luck with your studies!
+## License
+
+Add a license if you plan to publish or reuse the project outside coursework or internal use.
